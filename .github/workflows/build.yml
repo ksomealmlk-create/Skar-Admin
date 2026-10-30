@@ -1,0 +1,26 @@
+name: Build APK
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+concurrency:
+  group: build
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+      - run: chmod +x gradlew
+      - run: ./gradlew assembleDebug --no-daemon --parallel --build-cache
+      - uses: actions/upload-artifact@v4
+        with:
+          name: skar-admin-apk
+          path: app/build/outputs/apk/debug/*.apk
+          retention-days: 14
