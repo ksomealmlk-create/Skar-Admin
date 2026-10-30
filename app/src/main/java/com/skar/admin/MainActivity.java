@@ -51,6 +51,7 @@ public class MainActivity extends Activity {
     private FrameLayout splash;
     private ObjectAnimator pulse;
     private String darkJs = "";
+    private boolean injected = false;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Runnable failsafe = this::hideSplash;
 
@@ -104,7 +105,17 @@ public class MainActivity extends Activity {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 super.onPageStarted(view, url, favicon);
+                injected = false;
                 if (isOurPage(url)) showSplash();
+            }
+
+            @Override
+            public void onPageCommitVisible(WebView view, String url) {
+                super.onPageCommitVisible(view, url);
+                if (isOurPage(url) && !darkJs.isEmpty()) {
+                    injected = true;
+                    view.evaluateJavascript(darkJs, null);
+                }
             }
 
             @Override
@@ -123,7 +134,8 @@ public class MainActivity extends Activity {
             @Override
             public void onProgressChanged(WebView view, int progress) {
                 // نطبّق الثيم مبكراً قبل اكتمال التحميل لتقليل الوميض
-                if (progress >= 35 && isOurPage(view.getUrl()) && !darkJs.isEmpty()) {
+                if (progress >= 35 && !injected && isOurPage(view.getUrl()) && !darkJs.isEmpty()) {
+                    injected = true;
                     view.evaluateJavascript(darkJs, null);
                 }
             }
@@ -170,7 +182,7 @@ public class MainActivity extends Activity {
         s.setCacheMode(WebSettings.LOAD_NO_CACHE);
 
         // إصلاح العرض: عرض الجهاز الحقيقي بدون تكبير/تصغير يُخرج الصفحة عن الشاشة
-        s.setUseWideViewPort(true);
+        s.setUseWideViewPort(false);
         s.setLoadWithOverviewMode(false);
         s.setSupportZoom(false);
         s.setBuiltInZoomControls(false);

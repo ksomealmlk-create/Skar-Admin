@@ -4,19 +4,20 @@
   if (!D.documentElement) return 'no-doc';
   var head = D.head || D.documentElement;
 
-  /* ---------- 1) ثبات العرض ومنع التمرير الأفقي ---------- */
+  /* ---------- 1+2) صفحة واحدة ثابتة: بدون تحريك يمين/يسار، والتمرير عمودي فقط داخل الصفحة ---------- */
   var m = D.querySelector('meta[name=viewport]');
   if (!m) { m = D.createElement('meta'); m.name = 'viewport'; head.appendChild(m); }
-  m.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover');
+  m.setAttribute('content', 'width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover');
 
-  /* ---------- 2) لمسات رسومية خفيفة (بدون فلاتر ثقيلة) ---------- */
   var css = [
-    'html{background:#0A0F1A!important;overscroll-behavior:none}',
-    'body{background:transparent!important;max-width:100%!important;overflow-x:clip}',
+    'html{height:100%!important;width:100%!important;overflow:hidden!important;touch-action:pan-y;background:#0A0F1A!important}',
+    'body{height:100%!important;width:100%!important;max-width:100%!important;box-sizing:border-box;',
+    ' overflow-x:hidden!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch;',
+    ' overscroll-behavior:none;touch-action:pan-y;background:transparent!important}',
     'body::before{content:"";position:fixed;left:0;top:0;right:0;bottom:0;z-index:-1;pointer-events:none;',
     ' background:radial-gradient(480px 360px at 90% -4%,rgba(20,184,166,.20),transparent 70%),',
     ' radial-gradient(440px 400px at -6% 104%,rgba(99,102,241,.18),transparent 70%)}',
-    '.sk-scroll{overflow-x:auto!important;max-width:100%;-webkit-overflow-scrolling:touch}',
+    '.sk-scroll{overflow-x:auto!important;max-width:100%;touch-action:pan-x pan-y;-webkit-overflow-scrolling:touch}',
     '.sk-scroll::-webkit-scrollbar{height:4px}',
     '[data-sk=card]{border:1px solid rgba(148,163,184,.16)!important;',
     ' box-shadow:inset 0 3px 0 #14b8a6,0 12px 30px rgba(0,0,0,.45)!important}',
@@ -26,13 +27,6 @@
   var st = D.getElementById('skar-dark-css');
   if (!st) { st = D.createElement('style'); st.id = 'skar-dark-css'; head.appendChild(st); }
   st.textContent = css;
-
-  if (!W.__skarScrollLock) {
-    W.__skarScrollLock = true;
-    W.addEventListener('scroll', function () {
-      if (W.pageXOffset !== 0) W.scrollTo(0, W.pageYOffset);
-    }, { passive: true });
-  }
 
   /* ---------- 3) تصنيف البطاقات والأزرار + لفّ الجداول ---------- */
   function rgb(s) {
