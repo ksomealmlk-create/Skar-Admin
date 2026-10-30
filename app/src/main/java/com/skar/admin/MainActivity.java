@@ -177,11 +177,11 @@ public class MainActivity extends Activity {
         s.setDisplayZoomControls(false);
         s.setTextZoom(100);
 
-        // نعطّل الوضع الداكن التلقائي للنظام حتى لا يتداخل مع ثيمنا
+        // الوضع الداكن المدمج بالنظام: أخف وأسلس بالتمرير من فلاتر CSS
         if (Build.VERSION.SDK_INT >= 33) {
-            s.setAlgorithmicDarkeningAllowed(false);
+            s.setAlgorithmicDarkeningAllowed(true);
         } else if (Build.VERSION.SDK_INT >= 29) {
-            s.setForceDark(WebSettings.FORCE_DARK_OFF);
+            s.setForceDark(WebSettings.FORCE_DARK_ON);
         }
     }
 

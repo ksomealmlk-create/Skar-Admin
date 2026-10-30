@@ -2,41 +2,31 @@
   'use strict';
   var D = document, W = window;
   if (!D.documentElement) return 'no-doc';
-
-  /* ---------- 1) إصلاح العرض: منع تمدد الصفحة أفقياً ---------- */
-  var m = D.querySelector('meta[name=viewport]');
   var head = D.head || D.documentElement;
+
+  /* ---------- 1) ثبات العرض ومنع التمرير الأفقي ---------- */
+  var m = D.querySelector('meta[name=viewport]');
   if (!m) { m = D.createElement('meta'); m.name = 'viewport'; head.appendChild(m); }
   m.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover');
 
-  /* ---------- 2) الثيم الداكن (قلب الألوان + لمسات رسومية) ---------- */
-  var INV = 'invert(.92) hue-rotate(180deg)';
-  var UNDO = 'invert(1) hue-rotate(180deg)';
+  /* ---------- 2) لمسات رسومية خفيفة (بدون فلاتر ثقيلة) ---------- */
   var css = [
-    'html{filter:' + INV + '!important;max-width:100vw!important;overflow-x:hidden!important;',
-    ' background:radial-gradient(520px 380px at 88% -4%,rgba(20,184,166,.40),transparent 70%),',
-    ' radial-gradient(480px 420px at -6% 105%,rgba(99,102,241,.32),transparent 70%),',
-    ' linear-gradient(180deg,#e6eef9,#d8e4f5) fixed #dce7f6!important}',
-    'body{background:transparent!important;max-width:100vw!important;overflow-x:hidden!important;min-height:100vh}',
-    'img,video,canvas,picture,iframe{filter:' + UNDO + '}',
-    '::selection{background:#14b8a6;color:#fff}',
+    'html{background:#0A0F1A!important;overscroll-behavior:none}',
+    'body{background:transparent!important;max-width:100%!important;overflow-x:clip}',
+    'body::before{content:"";position:fixed;left:0;top:0;right:0;bottom:0;z-index:-1;pointer-events:none;',
+    ' background:radial-gradient(480px 360px at 90% -4%,rgba(20,184,166,.20),transparent 70%),',
+    ' radial-gradient(440px 400px at -6% 104%,rgba(99,102,241,.18),transparent 70%)}',
     '.sk-scroll{overflow-x:auto!important;max-width:100%;-webkit-overflow-scrolling:touch}',
     '.sk-scroll::-webkit-scrollbar{height:4px}',
-    '[data-sk=card]{box-shadow:inset 0 0 0 999px rgba(120,140,175,.10),0 0 0 1px rgba(100,130,170,.35),0 14px 34px rgba(60,90,130,.28)!important;',
-    ' border-color:rgba(100,130,170,.35)!important;',
-    ' background-image:linear-gradient(90deg,#14b8a6,#6366f1)!important;background-repeat:no-repeat!important;',
-    ' background-size:100% 3px!important;background-position:top!important}',
-    '[data-sk=btn]{filter:' + UNDO + ';box-shadow:0 6px 18px rgba(20,184,166,.38)}',
-    'table{border-collapse:separate;border-spacing:0}',
-    'a{transition:opacity .15s}'
+    '[data-sk=card]{border:1px solid rgba(148,163,184,.16)!important;',
+    ' box-shadow:inset 0 3px 0 #14b8a6,0 12px 30px rgba(0,0,0,.45)!important}',
+    '[data-sk=btn]{box-shadow:0 6px 18px rgba(20,184,166,.35)}',
+    '::selection{background:#14b8a6;color:#fff}'
   ].join('');
   var st = D.getElementById('skar-dark-css');
-  if (!st) {
-    st = D.createElement('style'); st.id = 'skar-dark-css'; head.appendChild(st);
-  }
+  if (!st) { st = D.createElement('style'); st.id = 'skar-dark-css'; head.appendChild(st); }
   st.textContent = css;
 
-  /* ---------- 3) إبقاء الصفحة بدون تمرير أفقي ---------- */
   if (!W.__skarScrollLock) {
     W.__skarScrollLock = true;
     W.addEventListener('scroll', function () {
@@ -44,7 +34,7 @@
     }, { passive: true });
   }
 
-  /* ---------- 4) تصنيف العناصر (بطاقات / أزرار) + لفّ الجداول ---------- */
+  /* ---------- 3) تصنيف البطاقات والأزرار + لفّ الجداول ---------- */
   function rgb(s) {
     var r = s && s.match(/rgba?\(([^)]+)\)/);
     if (!r) return null;
@@ -102,11 +92,11 @@
     var timer = null;
     W.__skarObs = new MutationObserver(function () {
       clearTimeout(timer);
-      timer = setTimeout(scan, 120);
+      timer = setTimeout(scan, 150);
     });
     W.__skarObs.observe(D.body, {
       childList: true, subtree: true,
-      attributes: true, attributeFilter: ['class', 'style', 'hidden']
+      attributes: true, attributeFilter: ['class', 'hidden']
     });
   }
   return 'ok';
