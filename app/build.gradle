@@ -14,8 +14,22 @@ android {
         versionName "1.0"
     }
 
+    signingConfigs {
+        skar {
+            storeFile file('skar-release.jks')
+            storeType 'pkcs12'
+            storePassword 'F35rgO42EOtAcIO1xZf1'
+            keyAlias 'skar'
+            keyPassword 'F35rgO42EOtAcIO1xZf1'
+        }
+    }
+
     buildTypes {
+        debug {
+            signingConfig signingConfigs.skar
+        }
         release {
+            signingConfig signingConfigs.skar
             minifyEnabled false
         }
     }
