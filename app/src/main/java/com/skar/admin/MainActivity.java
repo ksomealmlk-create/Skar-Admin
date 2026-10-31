@@ -154,20 +154,32 @@ public class MainActivity extends Activity {
                 return true;
             }
 
-            // رفع صورة الإعلان من الجهاز
+            // رفع صورة الإعلان من الجهاز: نجرب أكثر من طريقة حتى تطلع الصور على أي جهاز
             @Override
             public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> cb, FileChooserParams params) {
                 if (filePathCb != null) filePathCb.onReceiveValue(null);
                 filePathCb = cb;
-                try {
-                    Intent i = new Intent(Intent.ACTION_GET_CONTENT);
-                    i.addCategory(Intent.CATEGORY_OPENABLE);
-                    i.setType("image/*");
-                    startActivityForResult(Intent.createChooser(i, "اختر صورة"), PICK_IMG);
-                } catch (Exception e) {
-                    filePathCb = null;
-                    cb.onReceiveValue(null);
+                Intent[] tries = new Intent[4];
+                try { tries[0] = params.createIntent(); } catch (Exception ignored) {}
+                Intent g = new Intent(Intent.ACTION_GET_CONTENT);
+                g.addCategory(Intent.CATEGORY_OPENABLE);
+                g.setType("image/*");
+                tries[1] = g;
+                Intent o = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                o.addCategory(Intent.CATEGORY_OPENABLE);
+                o.setType("image/*");
+                tries[2] = o;
+                tries[3] = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                for (Intent i : tries) {
+                    if (i == null) continue;
+                    try {
+                        startActivityForResult(i, PICK_IMG);
+                        return true;
+                    } catch (Exception ignored) {}
                 }
+                filePathCb = null;
+                cb.onReceiveValue(null);
+                Toast.makeText(MainActivity.this, "تعذر فتح اختيار الصور على هذا الجهاز. الصق رابط الصورة بدلاً منها", Toast.LENGTH_LONG).show();
                 return true;
             }
 
@@ -337,8 +349,11 @@ public class MainActivity extends Activity {
     protected void onActivityResult(int req, int res, Intent data) {
         super.onActivityResult(req, res, data);
         if (req == PICK_IMG && filePathCb != null) {
-            Uri[] r = (res == RESULT_OK && data != null && data.getData() != null)
-                    ? new Uri[]{data.getData()} : null;
+            Uri[] r = null;
+            try { r = WebChromeClient.FileChooserParams.parseResult(res, data); } catch (Exception ignored) {}
+            if (r == null && res == RESULT_OK && data != null && data.getData() != null) {
+                r = new Uri[]{data.getData()};
+            }
             filePathCb.onReceiveValue(r);
             filePathCb = null;
         }
