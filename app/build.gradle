@@ -10,12 +10,26 @@ android {
         applicationId "com.skar.admin"
         minSdk 23
         targetSdk 34
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.1"
+    }
+
+    signingConfigs {
+        skar {
+            storeFile file('skar-release.jks')
+            storeType 'pkcs12'
+            storePassword 'F35rgO42EOtAcIO1xZf1'
+            keyAlias 'skar'
+            keyPassword 'F35rgO42EOtAcIO1xZf1'
+        }
     }
 
     buildTypes {
+        debug {
+            signingConfig signingConfigs.skar
+        }
         release {
+            signingConfig signingConfigs.skar
             minifyEnabled false
         }
     }
