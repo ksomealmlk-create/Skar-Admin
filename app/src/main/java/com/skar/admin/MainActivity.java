@@ -206,6 +206,7 @@ public class MainActivity extends Activity {
     private void setupWebSettings() {
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
+        s.setUserAgentString(s.getUserAgentString() + " SkarAdminApp"); // علامة: الحذف يُسمح به من هذا التطبيق فقط
         s.setDomStorageEnabled(true);
         s.setAllowFileAccess(false);
         s.setAllowContentAccess(false);
